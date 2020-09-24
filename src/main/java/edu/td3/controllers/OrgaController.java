@@ -1,72 +1,83 @@
 package edu.td3.controllers;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.client.RestTemplate;
 
 import edu.td3.models.Organization;
-import edu.td3.repositories.GroupRepository;
-import edu.td3.repositories.OrgaRepository;
-import edu.td3.repositories.UserRepository;
 import io.github.jeemv.springboot.vuejs.VueJS;
 
 
 
 
-
+@Controller
 
 
 
  
-@Controller
-@RequestMapping("/rest/")
 public class OrgaController {
+
 	@Autowired
-    private OrgaRepository repo;
-	@Autowired
-	private UserRepository uRepo;
-	@Autowired
-	private GroupRepository gRepo;
+	private RestTemplate restTemplate;
 	
 	@Autowired
 	private VueJS vue;
+    
+	@RequestMapping("/orgas/")
+    public String index(ModelMap model) {
+		
+	    final String URL = "http://localhost:8080/rest/orgas/";
+		ResponseEntity<List<Organization>> responseEntity = restTemplate.exchange(
+			    URL, 
+			    HttpMethod.GET, 
+			    null, 
+			    new ParameterizedTypeReference<List<Organization>>() {
+			    });
+		List<Organization> Organizations = responseEntity.getBody();
+           
+	    vue.addData("organizations", Organizations);
 	
-	@GetMapping("/orgas/")
-	public String read(ModelMap model) {
+		vue.addData("headers", GenHeaders());
 
-	    List<Organization> organizations = repo.findAll();
-		vue.addData("organizations", organizations);
-		model.put("vue", vue);
-		return "index";
+		vue.addData("organizations",Collections.emptyList());
+		vue.addData("editedIndex",-1);
+		vue.addMethod("editItem(item)" , "this.editedIndex = this.desserts.indexOf(item)\r\n" + 
+				"      this.editedItem = Object.assign({}, item)\r\n" + 
+				"      this.dialog = true");
+		vue.addDataRaw("editedItem", "{name: '',calories: 0,fat: 0,carbs: 0,protein: 0}");
+		vue.addDataRaw("defaultItem", "{name: '',calories: 0,fat: 0,carbs: 0,protein: 0}");
+		vue.addComputed("formTitle", "return this.editedIndex === -1 ? 'New Item' : 'Edit Item'");
+
+	    model.put("vue", vue);
+        return "index";
+       }
+	
+	public List<ModelMap> GenHeaders() {
+		List<ModelMap> headers = new ArrayList<ModelMap>();
+		ModelMap col = new ModelMap();
+		col.addAttribute("text", "Organizations");
+		col.addAttribute("align", "start");
+		col.addAttribute("sortable", false);
+		col.addAttribute("value", "name");
+		headers.add(col);
+		ModelMap col2 = new ModelMap();
+		col2.addAttribute("text", "Aliases");
+		col2.addAttribute("value", "aliases");
+		headers.add(col2);
+		ModelMap col3 = new ModelMap();
+		col3.addAttribute("text", "Domain");
+		col3.addAttribute("value", "domain");
+		headers.add(col3);
+		return headers;
+		
 	}
-	
-	@GetMapping("/orgas/{id}")
-	public String read(@PathVariable int id,ModelMap model) {
-		Organization orga = repo.findById(id);
-		vue.addData("orga", orga);
-		model.put("vue", vue);
-		return "index";
-	}
-	
-	@PostMapping("/orgas/create")
-    public void create(@ModelAttribute Organization orga) {
-		Organization e = orga;
-		repo.saveAndFlush(e);
-   
-    }
-	
-	@DeleteMapping("/orgas/delete/{id}")
-    public RedirectView delete(@PathVariable int id) {
-		repo.deleteById(id);
-        return new RedirectView("/orgas/");
-    }
 	
 }
