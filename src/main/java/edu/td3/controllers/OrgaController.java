@@ -34,6 +34,7 @@ public class OrgaController {
 	@RequestMapping("/orgas/")
     public String index(ModelMap model) {
 		
+		//Get Organizations list from API
 	    final String URL = "http://localhost:8080/rest/orgas/";
 		ResponseEntity<List<Organization>> responseEntity = restTemplate.exchange(
 			    URL, 
@@ -42,11 +43,45 @@ public class OrgaController {
 			    new ParameterizedTypeReference<List<Organization>>() {
 			    });
 		List<Organization> Organizations = responseEntity.getBody();
-           
+        
+		//Adding Organizations list to vue's data
 	    vue.addData("organizations", Organizations);
-		vue.addData("headers", GenHeaders());
-		vue.addData("editedIndex",-1);
+	    //Adding Required data to vue
+	    AddDatas();
+	   //Adding Required computed to vue
+		vue.addComputed("formTitle", "return this.editedIndex === -1 ? 'Nouvelle Organisation' : 'Editer Organisation'");
+		//Adding Required methods to vue
+		AddMethods();
+	    model.put("vue", vue);
+        return "index";
+       }
+	
+	public void AddDatas() {
+		vue.addDataRaw("headers", " [{\r\n" + 
+				"                        \"text\": \"Organizations\",\r\n" + 
+				"                        \"align\": \"start\",\r\n" + 
+				"                        \"sortable\": false,\r\n" + 
+				"                        \"value\": \"name\"\r\n" + 
+				"                    }, {\r\n" + 
+				"                        \"text\": \"Aliases\",\r\n" + 
+				"                        \"value\": \"aliases\"\r\n" + 
+				"                    }, {\r\n" + 
+				"                        \"text\": \"Domain\",\r\n" + 
+				"                        \"value\": \"domain\"\r\n" + 
+				"                    }, {\r\n" + 
+				"                        \"text\": \"Actions\",\r\n" + 
+				"                        \"value\": \"actions\"\r\n" + 
+				"                    }, {\r\n" + 
+				"                        \"value\": \"data-table-expand\"\r\n" + 
+				"                    }]");
+		vue.addDataRaw("editedItem", "{ name: '',aliases: '', domain: '',settings: '',users: []}");
 		vue.addData("dialog",false);
+		vue.addDataRaw("defaultItem", "{ name: '',aliases: '', domain: '',settings: '',users: []}");
+		vue.addData("editedIndex",-1);
+	}
+	
+	public void AddMethods() {
+		
 		vue.addMethod("editItem" , "this.editedIndex = this.organizations.indexOf(item)\r\n" + 
 				"      this.editedItem = Object.assign({}, item)\r\n" + 
 				"      this.dialog = true","item");
@@ -66,35 +101,9 @@ public class OrgaController {
 				+ "      })");
 		vue.addMethod("deleteItem" , " const index = this.organizations.indexOf(item)\r\n"
 				+ "      confirm('Are you sure you want to delete this item?') && this.organizations.splice(index, 1) && this.$http['delete']('http://localhost:8080/rest/orgas/delete/'+ item.id)","item");
-		vue.addDataRaw("editedItem", "{ name: '',aliases: '', domain: '',settings: '',users: []}");
-		vue.addDataRaw("defaultItem", "{ name: '',aliases: '', domain: '',settings: '',users: []}");
-		vue.addComputed("formTitle", "return this.editedIndex === -1 ? 'Nouvelle Organisation' : 'Editer Organisation'");
-
-	    model.put("vue", vue);
-        return "index";
-       }
-	
-	public List<ModelMap> GenHeaders() {
-		List<ModelMap> headers = new ArrayList<ModelMap>();
-		ModelMap col = new ModelMap();
-		col.addAttribute("text", "Organizations");
-		col.addAttribute("align", "start");
-		col.addAttribute("sortable", false);
-		col.addAttribute("value", "name");
-		headers.add(col);
-		ModelMap col2 = new ModelMap();
-		col2.addAttribute("text", "Aliases");
-		col2.addAttribute("value", "aliases");
-		headers.add(col2);
-		ModelMap col3 = new ModelMap();
-		col3.addAttribute("text", "Domain");
-		col3.addAttribute("value", "domain");
-		headers.add(col3);
-		ModelMap col4 = new ModelMap();
-		col4.addAttribute("text", "Actions");
-		col4.addAttribute("value", "actions");
-		headers.add(col4);
-		return headers;
+		
+		
 	}
+	
 	
 }
