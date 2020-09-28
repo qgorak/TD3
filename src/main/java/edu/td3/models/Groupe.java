@@ -1,7 +1,6 @@
 package edu.td3.models;
 
 import java.util.List;
-import java.util.Optional;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

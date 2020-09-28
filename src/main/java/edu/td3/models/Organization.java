@@ -1,6 +1,5 @@
 package edu.td3.models;
  
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -10,9 +9,13 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 
  
 @Entity
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Organization {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
@@ -23,14 +26,25 @@ public class Organization {
     private String aliases;
     private String settings;
 
-	@OneToMany(mappedBy ="orga",cascade = CascadeType.REMOVE)
+
+	@OneToMany(mappedBy ="orga",cascade = CascadeType.REMOVE,targetEntity=User.class)
     private List<User> users;
-    @OneToMany(cascade=CascadeType.ALL,mappedBy="orga")
+	
+    @OneToMany(mappedBy ="orga",cascade = CascadeType.REMOVE,targetEntity=Groupe.class)
     private List<Groupe> groupes;
+	
+	
+
 	
     
     
-    public List<User> getUsers() {
+    public List<Groupe> getGroupes() {
+		return groupes;
+	}
+	public void setGroupes(List<Groupe> groupes) {
+		this.groupes = groupes;
+	}
+	public List<User> getUsers() {
 		return users;
 	}
 	public void setUsers(List<User> users) {

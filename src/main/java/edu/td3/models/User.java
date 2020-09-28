@@ -1,7 +1,6 @@
 package edu.td3.models;
 
 import java.util.List;
-import java.util.Optional;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -15,12 +14,14 @@ public class User {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private int id;
-    public int getId() {
+  
+	public int getId() {
 		return id;
 	}
 	public void setId(int id) {
 		this.id = id;
 	}
+
 	private String name;
     @ManyToOne
     private Organization orga;

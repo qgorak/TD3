@@ -95,7 +95,6 @@ public class OrgaController {
 		col4.addAttribute("value", "actions");
 		headers.add(col4);
 		return headers;
-		
 	}
 	
 }
