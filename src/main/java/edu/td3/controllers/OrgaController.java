@@ -1,6 +1,5 @@
 package edu.td3.controllers;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 
 import edu.td3.models.Organization;
 import io.github.jeemv.springboot.vuejs.AbstractVueJS;
+import io.github.jeemv.springboot.vuejs.utilities.Http;
 
 
 
@@ -50,11 +50,13 @@ public class OrgaController {
 		vue.addMethod("editItem" , "this.editedIndex = this.organizations.indexOf(item)\r\n" + 
 				"      this.editedItem = Object.assign({}, item)\r\n" + 
 				"      this.dialog = true","item");
+
 		vue.addMethod("save" , "if (this.editedIndex > -1) {\r\n"
-				+ "        Object.assign(this.organizations[this.editedIndex], this.editedItem"
-				+ "Object.assign(this.desserts[this.editedIndex], this.editedItem))\r\n"
-				+ "      } else {\r\n"
+				+ "        Object.assign(this.organizations[this.editedIndex], this.editedItem)\r\n"
+				+ "        this.$http['post']('http://localhost:8080/rest/orgas/update/'+ this.organizations[this.editedIndex].id,this.editedItem)"
+				+ "      } else {\r\n"	
 				+ "        this.organizations.push(this.editedItem)\r\n"
+				+ "        this.$http['post']('http://localhost:8080/rest/orgas/create', this.editedItem)"
 				+ "      }\r\n"
 				+ "      this.close()");
 		vue.addMethod("close" , " this.dialog = false\r\n"
@@ -63,10 +65,10 @@ public class OrgaController {
 				+ "        this.editedIndex = -1\r\n"
 				+ "      })");
 		vue.addMethod("deleteItem" , " const index = this.organizations.indexOf(item)\r\n"
-				+ "      confirm('Are you sure you want to delete this item?') && this.organizations.splice(index, 1)","item");
-		vue.addDataRaw("editedItem", "{name: '',calories: 0,fat: 0,carbs: 0,protein: 0}");
-		vue.addDataRaw("defaultItem", "{name: '',calories: 0,fat: 0,carbs: 0,protein: 0}");
-		vue.addComputed("formTitle", "return this.editedIndex === -1 ? 'New Item' : 'Edit Item'");
+				+ "      confirm('Are you sure you want to delete this item?') && this.organizations.splice(index, 1) && this.$http['delete']('http://localhost:8080/rest/orgas/delete/'+ item.id)","item");
+		vue.addDataRaw("editedItem", "{ name: '',aliases: '', domain: '',settings: '',users: []}");
+		vue.addDataRaw("defaultItem", "{ name: '',aliases: '', domain: '',settings: '',users: []}");
+		vue.addComputed("formTitle", "return this.editedIndex === -1 ? 'Nouvelle Organisation' : 'Editer Organisation'");
 
 	    model.put("vue", vue);
         return "index";
