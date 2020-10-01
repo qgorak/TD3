@@ -2,6 +2,7 @@ package edu.td3.controllers;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,14 +22,16 @@ import edu.td3.repositories.OrgaRepository;
 
 
 
- 
+@CrossOrigin("http://localhost:8080")
+
 @RestController
 @RequestMapping("/rest/")
 public class RestOrgaController {
+	
+	
 	@Autowired
     private OrgaRepository repo;
-	@Autowired
-    private OrgaRepository uRepo;
+
 
 
 	
@@ -44,16 +47,19 @@ public class RestOrgaController {
 		return repo.findById(id);
 	}
 	
-	
+
 	@PostMapping("/orgas/create")
     public void create(@RequestBody Organization orga) {
 		repo.saveAndFlush(orga);
     }
-	
+	@CrossOrigin("http://localhost:8080")
 	@DeleteMapping("/orgas/delete/{id}")
     public void delete(@PathVariable int id) {
 		repo.deleteById(id);
+
+		
     }
+	@CrossOrigin("http://localhost:8080")
 	@PostMapping("orgas/update/{id}")
     public void update(@PathVariable int id,@RequestBody Organization orga) {
 		Organization orgaToUpdate = repo.findById(id);
